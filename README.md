@@ -22,6 +22,26 @@ We are using [BEM (Better Experimentation Manager)](https://github.com/darioShar
 
 - **Comparison between discrete time DLPM and continuous time LIM**: This repository supports both DLPM, our discrete time heavy-tailed diffusion model, and LIM, the continuous time counterpart, as retrieved from the supplmentary material of the [corresponding paper](https://openreview.net/forum?id=0Wp3VHX0Gm). While our paper argues for the superiority of the DLPM approach, users can experiment with both models and compare their behavior and performance.
 
+Here is the code for a section that explains how to use different 2D datasets and image datasets in the DLPM repository:
+
+---
+
+### Supported Datasets
+
+The DLPM framework allows you to work with a variety of datasets, both synthetic 2D datasets and popular image datasets. Depending on your experiment needs, you can select the appropriate dataset configuration. Here’s a brief overview of the supported datasets and how to specify them:
+
+- **2D Datasets**: 
+  - The repository supports synthetic 2D datasets, as provided by BEM. See `Generator.available_distributions` in `bem/datasets/Data.py`.
+  - To use the GMM grid for your experiments, you can specify the configuration in the command as follows:
+
+- **Image Datasets**: 
+  - You can use standard image datasets as provided by BEM (MNIST, CIFAR-10, its long-tailed version CIFAR-10-LT, CELEBA etc., see `bem/datasets/__init__.py`).
+  - Configuration files for some of these datasets are provided in the `dlpm/configs/` directory: `mnist.yml` for MNIST, `cifar10.yml` for CIFAR-10, `cifar10_lt.yml` for CIFAR-10-LT.
+    
+You can modify the configuration files to adjust data loading settings, such as the batch size or data augmentation options, according to your experiment needs.
+
+---
+
 ### Using the Provided Scripts
 
 This repository includes scripts that simplify the process of training, evaluating, and visualizing the results of DLPM. Below is a description of each script and how to use them:
