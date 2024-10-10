@@ -1,3 +1,11 @@
+dlpm/configs/others/*
+eval_files**
+models/**
+**.pyc
+animation/*
+**neptune
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

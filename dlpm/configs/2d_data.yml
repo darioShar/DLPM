@@ -1,0 +1,122 @@
+seed: null
+
+data:
+  between_minus_1_1: false
+  quantile_cutoff: 1.0
+  data_alpha: 1.8
+  dataset: gmm_grid     # sas_grid
+  isotropic: true
+  n_mixture: 9          # must be square. set to None if not a grid mixture
+  nfeatures: 2          # if data_type is 2d and this is one, will just project on first dimension
+  dim: 2                # if data_type is 2d and this is one, will just project on first dimension
+  normalized: false
+  nsamples: 25000
+  std: 0.1
+  theta: 3.0
+  weights:
+  # - 0.01
+  # - 0.99
+  - 0.01
+  - 0.1
+  - 0.3
+  - 0.2
+  - 0.02
+  - 0.15
+  - 0.02
+  - 0.15
+  - 0.05
+
+method: dlpm # LIM
+
+lim:
+  alpha: 1.8 
+  clamp_a: null
+  clamp_eps: null
+  reverse_steps: 100
+  isotropic: true
+  rescale_timesteps: true
+  # quadractic_timesteps: false
+
+dlpm:
+  alpha: 1.8 
+  clamp_a: null
+  clamp_eps: null
+  reverse_steps: 100
+  isotropic: true
+  mean_predict: EPSILON # See dlpm.ModelMeanType
+  rescale_timesteps: true
+  var_predict: FIXED # see dlpm.ModelVarType
+
+
+# replace 'ddim' by 'determinsitic' and udpate dlpm/dlim and lim/ode accordingly
+# manage 'eta'
+eval:
+  data_to_generate: 10000
+  batch_size: 4096
+  real_data: 10000 # in case of images, number of real images to store and to compare to
+
+  dlpm:
+    deterministic: false # dlim
+    dlim_eta: 1.0
+    reverse_steps: 100
+    clip_denoised: false
+  
+  lim: 
+    deterministic: false # ODE
+    reverse_steps: 100
+    clip_denoised: false
+
+model:
+  a_emb_size: 32
+  a_pos_emb: false
+  act: silu
+  dropout_rate: 0.0
+  group_norm: true
+  nblocks: 2
+  nunits: 16
+  skip_connection: true
+  time_emb_size: 16
+  time_emb_type: learnable
+  
+  # experimented with inputting a_t_0, a_t_1 in the model: unsuccessful
+  no_a: true
+  use_a_t: false # use only a_t_1 instead of (a_t_0, a_t_1)
+
+  # further experiments to do with learning variance, or the gamma factor
+  learn_variance: false
+
+
+training:
+  batch_size: 5000
+  num_workers: 0
+
+  dlpm:
+    ema_rates:
+    #- 0.9
+    grad_clip: null #1.0
+
+    loss_monte_carlo: mean # mean or median. aggregate function to apply to batch loss with M samples of a_{1:T}
+    loss_type: EPS_LOSS # other loss types to reimplment
+    lploss: 2. # p in LP loss. DLPM loss: 2.0, can also try smooth L1 loss (p = 1), or MSE loss (p =-1).
+    monte_carlo_inner: 1 # number of samples for inner expetation approximation in the loss of Proposition (9)
+    monte_carlo_outer: 1 # number of samples for outer expectation approximation in the loss of Proposition (9)
+
+  lim:
+    ema_rates:
+    #- 0.9
+    grad_clip: null #1.0
+
+optim:
+  optimizer: adamw
+  schedule: null # linear, steplr
+  lr: 0.005
+  warmup: 0 #1000
+  lr_steps: 2000
+  lr_step_size: 400
+  lr_gamma: 0.99
+
+run:
+  epochs: 20
+  eval_freq: 10
+  checkpoint_freq: 10
+  progress: true # print progress bar

@@ -1,0 +1,95 @@
+seed: null
+
+data:
+  dataset: cifar10
+  channels: 3
+  image_size: 32
+  random_flip: true
+  #num_classes: 10
+
+method: dlpm
+
+dlpm:
+  alpha: 1.8 #1.9
+  clamp_a: null 
+  clamp_eps: null 
+  diffusion_steps: 4000
+  isotropic: true
+  mean_predict: EPSILON
+  rescale_timesteps: true
+  var_predict: FIXED
+
+lim:
+  alpha: 1.8 
+  clamp_a: null
+  clamp_eps: null
+  reverse_steps: 1000
+  isotropic: true
+  rescale_timesteps: true
+  # quadractic_timesteps: false
+
+# replace 'ddim' by 'determinsitic' and udpate dlpm/dlim and lim/ode accordingly
+# manage 'eta'
+eval:
+  data_to_generate: 4096
+  batch_size: 128
+  real_data: 1000 # in case of images, number of real images to store and to compare to
+
+  dlpm:
+    deterministic: false # dlim
+    dlim_eta: 0.0
+    reverse_steps: 1000
+    clip_denoised: false
+  
+  lim: 
+    deterministic: false # ODE
+    reverse_steps: 1000
+    clip_denoised: false
+
+model:
+  model_type: "ddpm" #ddpm, lim_ddpm, lim_ncsnpp
+  attn_resolutions: [4, 8, 16]
+  channel_mult: [1, 2, 2, 2]
+  compute_gamma: false
+  dropout: 0.1
+  model_channels: 128
+  num_heads: 4
+  num_res_blocks: 2
+  learn_variance: false
+
+
+training:
+  batch_size: 128
+  num_workers: 2
+
+  dlpm:
+    ema_rates:
+    - 0.9999
+    grad_clip: null #1.0
+
+    loss_monte_carlo: mean # mean or median. aggregate function to apply to batch loss with M samples of a_{1:T}
+    loss_type: EPS_LOSS # other loss types to reimplment
+    lploss: 2. # p in LP loss. DLPM loss: 2.0, can also try smooth L1 loss (p = 1), or MSE loss (p =-1).
+    monte_carlo_inner: 1 # number of samples for inner expetation approximation in the loss of Proposition (9)
+    monte_carlo_outer: 1 # number of samples for outer expectation approximation in the loss of Proposition (9)
+
+  lim:
+    ema_rates:
+    - 0.9999
+    grad_clip: null #1.0
+
+  
+optim:
+  optimizer: adamw
+  schedule: steplr #steplr
+  lr: 0.0002
+  warmup: 500 #100
+  lr_steps: 300000
+  lr_step_size: 1000
+  lr_gamma: 0.99
+
+run:
+  epochs: 2000 #10000
+  eval_freq: null
+  checkpoint_freq: 50
+  progress: true # print progress bar

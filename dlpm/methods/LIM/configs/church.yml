@@ -1,0 +1,51 @@
+data:
+    dataset: "LSUN"
+    category: "church_outdoor"
+    image_size: 256
+    channels: 3
+    random_flip: true
+    num_workers: 0
+    num_classes: 2
+
+model:
+    model_type: "ddpm"
+    in_channels: 3
+    out_ch: 3
+    ch: 128
+    ch_mult: [1, 1, 2, 2, 4, 4]
+    num_res_blocks: 2
+    attn_resolutions: [16, ]
+    dropout: 0.0
+    ema_rate: 0.999
+    ema: True
+    resamp_with_conv: True
+    is_conditional: False
+
+    ckpt_dir: ""
+
+diffusion:
+    alpha: 1.5
+    beta_schedule: "cosine"
+    clamp: 20
+    is_isotropic: True
+    num_diffusion_timesteps: 1000
+
+training:
+    batch_size: 64
+    n_epochs: 10000
+    n_iters: 5000000
+    ckpt_store: 50000
+    validation_freq: 10000
+
+sampling:
+    batch_size: 100
+    bpd_batch_size: 100
+    fid_batch_size: 100
+    cond_class: 1
+    init_clamp: 20
+    sde_clamp: 20
+    clamp_threshold: 2000
+
+optim:
+    lr: 0.00001
+    eps: 0.00000001

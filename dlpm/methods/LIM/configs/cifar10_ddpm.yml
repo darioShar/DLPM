@@ -1,0 +1,52 @@
+data:
+    dataset: "CIFAR10"
+    image_size: 32
+    channels: 3
+    random_flip: True
+    num_workers: 0
+    num_classes: 10
+
+model:
+    model_type: "ddpm"
+    in_channels: 3
+    out_ch: 3
+    ch: 128
+    ch_mult: [1, 2, 2, 2]
+    num_res_blocks: 2
+    attn_resolutions: [16, ]
+    dropout: 0.1
+
+    ema_rate: 0.9999
+    ema: True
+    resamp_with_conv: True
+
+    is_conditional: False
+
+    ckpt_dir: ""
+
+diffusion:
+    alpha: 1.8
+    beta_schedule: "cosine" 
+    clamp: 20
+    is_isotropic: True
+    num_diffusion_timesteps: 1000
+
+training:
+    batch_size: 256
+    n_epochs: 100000
+    n_iters: 5000000
+    ckpt_store: 2500
+    validation_freq: 2500
+
+sampling:
+    batch_size: 100
+    bpd_batch_size: 1000
+    fid_batch_size: 100
+    cond_class: null
+    init_clamp: 20
+    sde_clamp: 20
+    clamp_threshold: 200
+
+optim:
+    lr: 0.0001
+    grad_clip: 1.0

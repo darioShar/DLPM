@@ -1,0 +1,91 @@
+seed: null
+
+data:
+  dataset: mnist 
+  channels: 1
+  image_size: 32 # resize, must be multiple of 32
+  random_flip: true
+
+method: dlpm
+
+dlpm:
+  alpha: 1.8 
+  clamp_a: null
+  clamp_eps: null
+  reverse_steps: 1000
+  isotropic: true
+  mean_predict: EPSILON # See dlpm.ModelMeanType
+  rescale_timesteps: true
+  var_predict: FIXED # see dlpm.ModelVarType
+
+lim:
+  alpha: 1.8 
+  clamp_a: null
+  clamp_eps: null
+  reverse_steps: 1000
+  isotropic: true
+  rescale_timesteps: true
+  # quadractic_timesteps: false
+
+# replace 'ddim' by 'determinsitic' and udpate dlpm/dlim and lim/ode accordingly
+# manage 'eta'
+eval:
+  data_to_generate: 1000
+  batch_size: 256
+  real_data: 1000 # in case of images, number of real images to store and to compare to
+
+  dlpm:
+    deterministic: false # dlim
+    dlim_eta: 0.0
+    reverse_steps: 1000
+    clip_denoised: false
+  
+  lim: 
+    deterministic: false # ODE
+    reverse_steps: 1000
+    clip_denoised: false
+
+model:
+  model_type: "ddpm"
+  attn_resolutions: [2, 4]
+  channel_mult: [1, 2, 2, 2]
+  dropout: 0.1
+  model_channels: 32
+  num_heads: 4
+  num_res_blocks: 2
+  learn_variance: false
+
+training:
+  batch_size: 256
+  num_workers: 2
+
+  dlpm:
+    ema_rates:
+    - 0.99
+    grad_clip: null #1.0
+
+    loss_monte_carlo: mean # mean or median. aggregate function to apply to batch loss with M samples of a_{1:T}
+    loss_type: EPS_LOSS # other loss types to reimplment
+    lploss: 2. # p in LP loss. DLPM loss: 2.0, can also try smooth L1 loss (p = 1), or MSE loss (p =-1).
+    monte_carlo_inner: 1 # number of samples for inner expetation approximation in the loss of Proposition (9)
+    monte_carlo_outer: 1 # number of samples for outer expectation approximation in the loss of Proposition (9)
+
+  lim:
+    ema_rates:
+    - 0.99
+    grad_clip: null #1.0
+
+optim:
+  optimizer: adamw
+  schedule: null #steplr
+  lr: 0.0005
+  warmup: 200 #100
+  lr_steps: 300000
+  lr_step_size: 400
+  lr_gamma: 0.99
+
+run:
+  epochs: 1000
+  eval_freq: null
+  checkpoint_freq: 300
+  progress: true # print progress bar of iter/epoch

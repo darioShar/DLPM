@@ -1,0 +1,68 @@
+data:
+    dataset: "CIFAR10"
+    image_size: 32
+    channels: 3
+    random_flip: true
+    num_workers: 0
+    num_classes: 10
+
+model:
+    model_type: "ncsnpp"
+    in_channels: 3
+    out_ch: 3
+    ch: 128
+    ch_mult: [1, 2, 2, 2]
+    num_res_blocks: 8
+    attn_resolutions: [16, ]
+    dropout: 0.1
+    ema_rate: 0.9999
+    ema: True
+    resamp_with_conv: True
+    is_time_conditional: True
+
+    scale_by_sigma: False
+    normalization: 'GroupNorm'
+    nonlinearity: 'swish'
+    fir: True
+    fir_kernel: [1, 3, 3, 1]
+    skip_rescale: True
+    resblock_type: 'biggan'
+    progressive: 'none'
+    progressive_input: 'residual'
+    progressive_combine: 'sum'
+    attention_type: 'ddpm'
+    init_scale: 0.
+    embedding_type: 'positional'
+    fourier_scale: 16
+    conv_size: 3
+
+    is_conditional: False
+
+    ckpt_dir: ""
+
+diffusion:
+    alpha: 1.8
+    beta_schedule: "cosine"
+    clamp: 20
+    is_isotropic: True
+    num_diffusion_timesteps: 1000
+
+training:
+    batch_size: 256
+    n_epochs: 100000
+    n_iters: 5000000
+    ckpt_store: 50000
+    validation_freq: 10000
+
+sampling:
+    batch_size: 1000
+    bpd_batch_size: 100
+    fid_batch_size: 1000
+    cond_class: 0
+    init_clamp: 20
+    sde_clamp: 20
+    clamp_threshold: 200
+
+optim:
+    lr: 0.0001
+    grad_clip: 1.0
