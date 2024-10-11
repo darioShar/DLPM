@@ -24,8 +24,6 @@ We are using [BEM (Better Experimentation Manager)](https://github.com/darioShar
 
 Here is the code for a section that explains how to use different 2D datasets and image datasets in the DLPM repository:
 
----
-
 ## Supported Datasets
 
 Here’s a brief overview of the supported datasets, as provided by `BEM`, and how to specify them:
@@ -39,8 +37,6 @@ Here’s a brief overview of the supported datasets, as provided by `BEM`, and h
 Configuration files for some of these datasets are provided in the `dlpm/configs/` directory: `mnist.yml` for MNIST, `cifar10.yml` for CIFAR-10, `cifar10_lt.yml` for CIFAR-10-LT.
     
 You can modify the configuration files to adjust data loading settings, such as the batch size or data augmentation options, according to your experiment needs.
-
----
 
 ## Using the Provided Scripts
 
@@ -91,8 +87,6 @@ python ./display.py --config mnist --name dlpm_test --method dlpm --epochs 100 -
 **Explanation**:
 - `--config`, `--name`, `--method`, `--epochs`, and `--reverse_steps`: Same as in the previous scripts.
 - `--generate`: Specifies the number of samples to visualize (e.g., `1` for displaying a single sample).
-
----
 
 ## Citation
 
