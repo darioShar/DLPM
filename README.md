@@ -22,8 +22,6 @@ We are using [BEM (Better Experimentation Manager)](https://github.com/darioShar
 
 - **Comparison between discrete time DLPM and continuous time LIM**: This repository supports both DLPM, our discrete time heavy-tailed diffusion model, and LIM, the continuous time counterpart, as retrieved from the supplmentary material of the [corresponding paper](https://openreview.net/forum?id=0Wp3VHX0Gm). While our paper argues for the superiority of the DLPM approach, users can experiment with both models and compare their behavior and performance.
 
-Here is the code for a section that explains how to use different 2D datasets and image datasets in the DLPM repository:
-
 ## Supported Datasets
 
 Here’s a brief overview of the supported datasets, as provided by `BEM`, and how to specify them:
