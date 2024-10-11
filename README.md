@@ -44,7 +44,7 @@ This repository includes scripts that simplify the process of training, evaluati
 
 ### 1. `run.py`
 
-This script is used to train the DLPM model. It accepts various command-line arguments to control the training process, including configuration settings and experiment parameters.
+This script is used to train a model. It accepts various command-line arguments to control the training process, including configuration settings and experiment parameters.
 
 **Example Command**:
 ```bash
@@ -62,7 +62,7 @@ python ./run.py --config mnist --name dlpm_test --method dlpm --epochs 100 --eva
 
 ### 2. `eval.py`
 
-This script evaluates a pre-trained DLPM model and can also be used for generating samples from the trained model.
+This script evaluates a pre-trained model and can also be used for generating samples from the trained model.
 
 **Example Command**:
 ```bash
@@ -77,7 +77,7 @@ python ./eval.py --config mnist --name dlpm_test --method dlpm --epochs 100 --ev
 
 ### 3. `display.py`
 
-This script is used to visualize the generated samples or the results from a DLPM experiment.
+This script is used to visualize the generated samples or the results from an experiment.
 
 **Example Command**:
 ```bash
