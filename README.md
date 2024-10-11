@@ -6,7 +6,7 @@ This repository contains the full implementation of DLPM, providing the tools fo
 
 For further details on the theoretical background and methodology, please refer to our preprint [here](https://arxiv.org/abs/2407.18609).
 
-### Repository Overview
+## Repository Overview
 
 We are using [BEM (Better Experimentation Manager)](https://github.com/darioShar/bem) ot manage our experiments.
 
@@ -26,27 +26,27 @@ Here is the code for a section that explains how to use different 2D datasets an
 
 ---
 
-### Supported Datasets
+## Supported Datasets
 
-The DLPM framework allows you to work with a variety of datasets, both synthetic 2D datasets and popular image datasets. Depending on your experiment needs, you can select the appropriate dataset configuration. Here’s a brief overview of the supported datasets and how to specify them:
+Here’s a brief overview of the supported datasets, as provided by `BEM`, and how to specify them:
 
 - **2D Datasets**: 
-  - The repository supports synthetic 2D datasets, as provided by BEM. See `Generator.available_distributions` in `bem/datasets/Data.py`.
-  - To use the GMM grid for your experiments, you can specify the configuration in the command as follows:
+  - The repository supports synthetic 2D datasets. See `Generator.available_distributions` in `bem/datasets/Data.py`.
 
 - **Image Datasets**: 
-  - You can use standard image datasets as provided by BEM (MNIST, CIFAR-10, its long-tailed version CIFAR-10-LT, CELEBA etc., see `bem/datasets/__init__.py`).
-  - Configuration files for some of these datasets are provided in the `dlpm/configs/` directory: `mnist.yml` for MNIST, `cifar10.yml` for CIFAR-10, `cifar10_lt.yml` for CIFAR-10-LT.
+  - You can use standard image datasets (MNIST, CIFAR-10, its long-tailed version CIFAR-10-LT, CELEBA etc.). See `bem/datasets/__init__.py`.
+
+Configuration files for some of these datasets are provided in the `dlpm/configs/` directory: `mnist.yml` for MNIST, `cifar10.yml` for CIFAR-10, `cifar10_lt.yml` for CIFAR-10-LT.
     
 You can modify the configuration files to adjust data loading settings, such as the batch size or data augmentation options, according to your experiment needs.
 
 ---
 
-### Using the Provided Scripts
+## Using the Provided Scripts
 
 This repository includes scripts that simplify the process of training, evaluating, and visualizing the results of DLPM. Below is a description of each script and how to use them:
 
-#### 1. `run.py`
+### 1. `run.py`
 
 This script is used to train the DLPM model. It accepts various command-line arguments to control the training process, including configuration settings and experiment parameters.
 
@@ -64,7 +64,7 @@ python ./run.py --config mnist --name dlpm_test --method dlpm --epochs 100 --eva
 - `--check`: Interval for model checkpointing (in epochs).
 - `--train_reverse_steps`: The number of reverse steps to use during training.
 
-#### 2. `eval.py`
+### 2. `eval.py`
 
 This script evaluates a pre-trained DLPM model and can also be used for generating samples from the trained model.
 
@@ -79,7 +79,7 @@ python ./eval.py --config mnist --name dlpm_test --method dlpm --epochs 100 --ev
 - `--generate`: Number of samples to generate.
 - `--reverse_steps`: Number of reverse steps to use during the generation process.
 
-#### 3. `display.py`
+### 3. `display.py`
 
 This script is used to visualize the generated samples or the results from a DLPM experiment.
 
@@ -92,14 +92,22 @@ python ./display.py --config mnist --name dlpm_test --method dlpm --epochs 100 -
 - `--config`, `--name`, `--method`, `--epochs`, and `--reverse_steps`: Same as in the previous scripts.
 - `--generate`: Specifies the number of samples to visualize (e.g., `1` for displaying a single sample).
 
-### Summary
-
-- **Training**: Use `run.py` with appropriate configurations.
-- **Evaluation**: Use `eval.py` for generating and evaluating samples.
-- **Visualization**: Use `display.py` to view the results and samples.
-
-Make sure to adjust the parameters and configuration files to suit your specific use case. This modular setup allows you to modify and extend DLPM to fit different datasets, architectures, and training strategies.
-
 ---
 
-Feel free to tweak this content or add any specific details. If you'd like to proceed with the next section or need further elaboration on any part, let me know!
+## Citation
+
+```bash
+@misc{shariatian2024denoisinglevyprobabilisticmodels,
+      title={Denoising L\'evy Probabilistic Models}, 
+      author={Dario Shariatian and Umut Simsekli and Alain Durmus},
+      year={2024},
+      eprint={2407.18609},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2407.18609}, 
+}
+```
+
+## Contribute
+
+We welcome issues, pull requests and contributions. We will try our best to improve readability and answer questions.
