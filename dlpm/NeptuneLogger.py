@@ -3,9 +3,8 @@ from neptune.utils import stringify_unsupported
 import torch
 import numpy as np
 from bem.Logger import Logger
+from private_code import Neptune_Project, Neptune_API_key
 
-Neptune_Project = "DLPM"
-Neptune_API_key = "eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0YjgwZWY4MC1lNzI5LTQ1MzEtOTEzMC1jMDJmMDE1ZTU0NjkifQ=="
 
 
 ''' this will manage all the information that could be contained in dictionnary like this:
