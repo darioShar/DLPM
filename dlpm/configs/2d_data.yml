@@ -39,13 +39,13 @@ lim:
 
 dlpm:
   alpha: 1.8 
-  clamp_a: null
-  clamp_eps: null
-  reverse_steps: 100
+  reverse_steps: 250
   isotropic: true
   mean_predict: EPSILON # See dlpm.ModelMeanType
   rescale_timesteps: true
   var_predict: FIXED # see dlpm.ModelVarType
+  scale: 'scale_preserving'
+  input_scaling: false
 
 
 # replace 'ddim' by 'determinsitic' and udpate dlpm/dlim and lim/ode accordingly
@@ -57,9 +57,11 @@ eval:
 
   dlpm:
     deterministic: false # dlim
-    dlim_eta: 1.0
+    dlim_eta: 0.0
     reverse_steps: 100
     clip_denoised: false
+    clamp_a: 10
+    clamp_eps: 50
   
   lim: 
     deterministic: false # ODE
@@ -72,8 +74,8 @@ model:
   act: silu
   dropout_rate: 0.0
   group_norm: true
-  nblocks: 2
-  nunits: 16
+  nblocks: 16
+  nunits: 128
   skip_connection: true
   time_emb_size: 16
   time_emb_type: learnable
@@ -93,13 +95,16 @@ training:
   dlpm:
     ema_rates:
     #- 0.9
-    grad_clip: null #1.0
+    grad_clip: null #1.0 #1.0
 
     loss_monte_carlo: mean # mean or median. aggregate function to apply to batch loss with M samples of a_{1:T}
     loss_type: EPS_LOSS # other loss types to reimplment
     lploss: 2. # p in LP loss. DLPM loss: 2.0, can also try smooth L1 loss (p = 1), or MSE loss (p =-1).
     monte_carlo_inner: 1 # number of samples for inner expetation approximation in the loss of Proposition (9)
     monte_carlo_outer: 1 # number of samples for outer expectation approximation in the loss of Proposition (9)
+
+    clamp_a: 10
+    clamp_eps: 50
 
   lim:
     ema_rates:
@@ -118,5 +123,5 @@ optim:
 run:
   epochs: 20
   eval_freq: 10
-  checkpoint_freq: 10
+  checkpoint_freq: null
   progress: true # print progress bar

@@ -4,8 +4,8 @@ import torch
 import numpy as np
 from bem.Logger import Logger
 
-Neptune_Project = "define your own"
-Neptune_API_key = "define your own"
+Neptune_Project = "DLPM"
+Neptune_API_key = "eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0YjgwZWY4MC1lNzI5LTQ1MzEtOTEzMC1jMDJmMDE1ZTU0NjkifQ=="
 
 
 ''' this will manage all the information that could be contained in dictionnary like this:

@@ -63,16 +63,18 @@ class DLPM:
         isotropic = True, # isotropic levy noise
         clamp_a = None,
         clamp_eps = None,
+        scale = 'scale_preserving'
     ):
         self.alpha = alpha
         self.device = device
         self.time_spacing = time_spacing
         self.isotropic = isotropic
         self.use_single_a_chain = True
+        self.scale = scale
 
         # 1d noising schedules
         self.gammas, self.bargammas, self.sigmas, self.barsigmas = \
-                    (x.to(self.device) for x in self.gen_noise_schedule(diffusion_steps))
+                    (x.to(self.device) for x in self.gen_noise_schedule(diffusion_steps, scale=self.scale))
         
         # noising schedules, adapted to batch size, to be potentially updated for each incoming batch
         self.constants = None
@@ -110,25 +112,47 @@ class DLPM:
 
     # Set noising variances betas as in Nichol and Dariwal paper (https://arxiv.org/pdf/2102.09672.pdf)
     def gen_noise_schedule(self, diffusion_steps, scale = 'scale_preserving'):
-        assert scale == 'scale_preserving', 'Only scale-preserving schedule is implemented for now'
+        # assert scale == 'scale_preserving', 'Only scale-preserving schedule is implemented for now'
+        if scale == 'scale_preserving':
+            s = 0.008
+            timesteps = self.get_timesteps(diffusion_steps)
 
-        s = 0.008
-        timesteps = self.get_timesteps(diffusion_steps)
+            schedule = torch.cos((timesteps / diffusion_steps + s) / (1 + s) * torch.pi / 2)**2
 
-        schedule = torch.cos((timesteps / diffusion_steps + s) / (1 + s) * torch.pi / 2)**2
+            baralphas = schedule / schedule[0]
+            betas = 1 - baralphas / torch.concatenate([baralphas[0:1], baralphas[0:-1]])
+            alphas = 1 - betas
 
-        baralphas = schedule / schedule[0]
-        betas = 1 - baralphas / torch.concatenate([baralphas[0:1], baralphas[0:-1]])
-        alphas = 1 - betas
+            # linear schedule for gamma
+            gammas = alphas**(1/self.alpha)
+            bargammas = torch.cumprod(gammas, dim = 0)
 
-        # linear schedule for gamma
-        gammas = alphas**(1/self.alpha)
-        bargammas = torch.cumprod(gammas, dim = 0)
+            # scale-preserving schedule
+            sigmas = (1 - gammas**(self.alpha))**(1/self.alpha)
+            barsigmas = (1 - bargammas**(self.alpha))**(1/self.alpha)
+        
+        elif scale == 'scale_exploding':
+            timesteps = self.get_timesteps(diffusion_steps)
+            sigma_min = 0.002
+            sigma_max = 80
+            rho = 7
 
-        # scale-preserving schedule
-        sigmas = (1 - gammas**(self.alpha))**(1/self.alpha)
-        barsigmas = (1 - bargammas**(self.alpha))**(1/self.alpha)
+            gammas = torch.ones_like(timesteps)
+            bargammas = torch.ones_like(timesteps)
 
+            barsigmas = (sigma_min**(1 / rho) + (timesteps / (diffusion_steps - 1)) * (sigma_max**(1 / rho) - sigma_min**(1 / rho)))**rho
+            # Calculate sigmas based on the cumulative sum condition
+            barsigmas_alpha = barsigmas**self.alpha
+            sigmas_alpha = torch.ones_like(barsigmas) * barsigmas_alpha[0]
+            for i in range(1, len(barsigmas)):
+                sigmas_alpha[i] = barsigmas_alpha[i] - torch.sum(sigmas_alpha[:i])
+            sigmas = sigmas_alpha**(1 / self.alpha)
+            
+            # assert torch.all(sigmas > 0), 'Sigma must be positive'
+            
+        else:
+            assert False, 'Unknown scale'
+        
         return gammas, bargammas, sigmas, barsigmas
 
     def get_schedule(self, shape):

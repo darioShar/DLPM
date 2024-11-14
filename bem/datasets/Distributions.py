@@ -19,7 +19,7 @@ def match_last_dims(data, size):
     """
     # Ensure data is 1-dimensional
     assert data.dim() == 1, f"Data must be 1-dimensional, got {data.size()}"
-    
+
     # Unsqueeze to add singleton dimensions for expansion
     for _ in range(len(size) - 1):
         data = data.unsqueeze(-1)

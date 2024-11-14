@@ -92,6 +92,12 @@ def update_parameters_before_loading(p, args):
     if args.t_embedding_size is not None:
         p['model']['time_emb_size'] = args.t_embedding_size
 
+    if args.scale is not None:
+        p[method]['scale'] = args.scale
+
+    if args.input_scaling:
+        p[method]['input_scaling'] = True
+
     return p
 
 
@@ -195,6 +201,8 @@ def parse_args():
     parser.add_argument('--median', help='use median of mean. Specify (outer, inner).', nargs ='+', default = None)
     parser.add_argument('--lploss', help='set p in lploss. p=1: L1, p=2 L2, p=-1 squared L2', default = None, type = float)
     parser.add_argument('--variance', help='learn variance', default = False, action='store_true')
+    parser.add_argument('--scale', help='choose scale exploding or scale preserving process', default = None, type=str)
+    parser.add_argument('--input_scaling', help='input scaling', default = None, action='store_true')
 
     # PARSE AND RETURN
     args = parser.parse_args()

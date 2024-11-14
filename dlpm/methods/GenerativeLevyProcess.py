@@ -7,7 +7,7 @@ from .LIM.functions.sampler import LIM_sampler
 from .LIM.torchlevy import LevyStable
 from .LIM.functions.loss import loss_fn
 from .dlpm import DLPM, ModelMeanType, ModelVarType, LossType
-
+from .dlpm import match_last_dims
 
 # return 1-d vector (num batches) of loss
 def compute_loss(tens, lploss):
@@ -55,9 +55,9 @@ class GenerativeLevyProcess:
             time_spacing = 'linear',
             rescale_timesteps=False,
             isotropic = True, # isotropic levy noise
-            clamp_a = None,
-            clamp_eps = None,
             LIM = False, # set dlpm heavy-tailed diffusion to continuous time LIM
+            scale = 'scale_preserving',
+            input_scaling = False,
             ):
         
         self.alpha = alpha
@@ -68,9 +68,8 @@ class GenerativeLevyProcess:
         self.time_spacing = time_spacing
         self.rescale_timesteps = rescale_timesteps
         self.isotropic = isotropic
-        self.clamp_a = clamp_a
-        self.clamp_eps = clamp_eps
         self.LIM = LIM
+        self.input_scaling = input_scaling
 
         assert (self.model_mean_type == ModelMeanType.EPSILON) \
             and (self.model_var_type == ModelVarType.FIXED), \
@@ -88,11 +87,11 @@ class GenerativeLevyProcess:
                         diffusion_steps=reverse_steps,
                         time_spacing = time_spacing,
                         isotropic = isotropic,
-                        clamp_a = clamp_a,
-                        clamp_eps = clamp_eps)
+                        scale=scale)
     
     def _scale_timesteps(self, t):
         if self.rescale_timesteps:
+            # return t.float() * (1.0 / self.reverse_steps)
             return t.float() * (1.0 / self.reverse_steps)
         return t
 
@@ -174,9 +173,11 @@ class GenerativeLevyProcess:
         B, C = x.shape[:2]
         assert t.shape == (B,)
         
-
         # run model
-        model_output = model(x, self._scale_timesteps(t), **model_kwargs)
+        input_scaling = 1.0
+        if self.input_scaling and (self.dlpm.scale == 'scale_exploding'):
+            input_scaling = match_last_dims(1 / (1+self.dlpm.barsigmas[t]), x.shape)
+        model_output = model(x * input_scaling,  self._scale_timesteps(t), **model_kwargs)
 
         if (self.model_mean_type == ModelMeanType.EPSILON) and (not clip_denoised):
             # just bypass everyhting
@@ -309,7 +310,7 @@ class GenerativeLevyProcess:
         if noise is not None:
             img = noise
         else:
-            img = self.dlpm.gen_eps.generate(size = shape)
+            img = self.dlpm.barsigmas[-1] * self.dlpm.gen_eps.generate(size = shape)
         yield {'sample': img}
 
         # linear timesteps
@@ -433,7 +434,7 @@ class GenerativeLevyProcess:
         if noise is not None:
             img = noise
         else:
-            img = self.dlpm.gen_eps.generate(size = shape)
+            img = self.dlpm.barsigmas[-1] * self.dlpm.gen_eps.generate(size = shape)
         yield {'sample': img}
         indices = list(range(self.reverse_steps-1, 0, -1))
         for i in indices:
@@ -516,8 +517,13 @@ class GenerativeLevyProcess:
                 deterministic=False, 
                 dlim_eta=1.0, 
                 print_progression=False, 
-                get_sample_history=False):
+                get_sample_history=False,
+                clamp_a = None,
+                clamp_eps = None):
         
+        self.dlpm.gen_a.setParams(clamp_a = clamp_a)
+        self.dlpm.gen_eps.setParams(clamp_eps = clamp_eps)
+
         model = models['default']
 
         # rescale noising with the number of provided reverse_steps
@@ -610,30 +616,47 @@ class GenerativeLevyProcess:
                             monte_carlo_outer = 1,
                             monte_carlo_inner = 1,
                             model_kwargs = None,
+                            clamp_a = None,
+                            clamp_eps = None,
                             ):
         assert self.model_mean_type == ModelMeanType.EPSILON, 'only epsilon model output is supported for the moment'
         assert loss_type == LossType.EPS_LOSS, 'only epsilon loss is supported for the moment'
         if model_kwargs is None:
             model_kwargs = {}
+
+        self.dlpm.gen_a.setParams(clamp_a = clamp_a)
+        self.dlpm.gen_eps.setParams(clamp_eps = clamp_eps)
+
         
         # get timesteps
         t = torch.randint(1, self.reverse_steps, size=[len(x_start)]).to(self.device)
-
+        # if self.dlpm.scale == 'scale_preserving':
+        #     t = torch.randint(1, self.reverse_steps, size=[len(x_start)]).to(self.device)
+        # elif self.dlpm.scale == 'scale_exploding':
+        #     P_mean = -1.2
+        #     P_std = 1.2
+        #     t = torch.exp(torch.normal(P_mean, P_std, size=[len(x_start)]).to(self.device)).int()
+        # else:
+        #     raise NotImplementedError(self.dlpm.scale)
+        
         # setup median of means estimator
         total_monte_carlo = monte_carlo_outer*monte_carlo_inner
         x_start_extended = x_start.repeat(total_monte_carlo, *([1]*len(x_start.shape[1:])))
         t_extended = t.repeat(total_monte_carlo)
         outer_shape = torch.tensor(x_start.shape) 
         outer_shape[0] *= monte_carlo_outer 
-        A = self.dlpm.get_one_rv_faster_sampling(outer_shape)
+        A = self.dlpm.get_one_rv_faster_sampling(list(outer_shape))
         A_extended = A.repeat(monte_carlo_inner, *([1]*len(A.shape[1:])))
         z_t_extended = torch.randn_like(x_start_extended, device=self.device) # inner expectation Gaussian (z_t)
-        
         # get loss elements
         x_t, eps_t = self.dlpm.get_one_rv_loss_elements(t_extended, x_start_extended, A_extended, z_t_extended)
-                
+
         # run model
-        model_eps = model(x_t, self._scale_timesteps(t), **model_kwargs)
+        input_scaling = 1.0
+        if self.input_scaling and (self.dlpm.scale == 'scale_exploding'):
+            input_scaling = match_last_dims(1 / (1+self.dlpm.barsigmas[t_extended]), x_t.shape)
+        model_eps = model(x_t * input_scaling,  self._scale_timesteps(t), **model_kwargs)
+        
         assert model_eps.shape == x_start.shape
 
         # compute loss with the right exponent

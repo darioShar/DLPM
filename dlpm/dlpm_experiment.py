@@ -110,8 +110,8 @@ def init_method_by_parameter(p):
                                     reverse_steps = p[chosen_gen_model]['reverse_steps'],
                                     rescale_timesteps = p[chosen_gen_model]['rescale_timesteps'],
                                     isotropic = p[chosen_gen_model]['isotropic'],
-                                    clamp_a=p[chosen_gen_model]['clamp_a'],
-                                    clamp_eps=p[chosen_gen_model]['clamp_eps'],
+                                    # clamp_a=p['training'][chosen_gen_model]['clamp_a'],
+                                    # clamp_eps=p['training'][chosen_gen_model]['clamp_eps'],
                                     LIM = LIM, # use continuous LIM
         )
     else:
@@ -122,9 +122,11 @@ def init_method_by_parameter(p):
                                     model_var_type = p[chosen_gen_model]['var_predict'],
                                     rescale_timesteps = p[chosen_gen_model]['rescale_timesteps'],
                                     isotropic = p[chosen_gen_model]['isotropic'],
-                                    clamp_a=p[chosen_gen_model]['clamp_a'],
-                                    clamp_eps=p[chosen_gen_model]['clamp_eps'],
+                                    # clamp_a=p['training'][chosen_gen_model]['clamp_a'],
+                                    # clamp_eps=p['training'][chosen_gen_model]['clamp_eps'],
                                     LIM = LIM, # do not use continuous LIM
+                                    scale = p[chosen_gen_model]['scale'],
+                                    input_scaling=p[chosen_gen_model]['input_scaling'],
         )
     return method
 
