@@ -9,7 +9,7 @@ data/*
 **.ipynb_checkpoints
 **.ipynb
 dlpm/private_code.py
-log/**
+log/*
 **.batch
 **.sh
 **.out
