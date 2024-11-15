@@ -7,6 +7,11 @@ animation/*
 data/**
 **.ipynb_checkpoints
 **.ipynb
+dlpm/private_code.py
+log/**
+**.batch
+**.sh
+**.out
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

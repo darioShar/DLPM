@@ -3,7 +3,7 @@ from neptune.utils import stringify_unsupported
 import torch
 import numpy as np
 from bem.Logger import Logger
-from private_code import Neptune_Project, Neptune_API_key
+from .private_code import Neptune_Project, Neptune_API_key
 
 
 
