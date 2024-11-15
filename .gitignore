@@ -4,7 +4,8 @@ models/**
 **.pyc
 animation/*
 **neptune
-data/**
+data/*
+!data/toy
 **.ipynb_checkpoints
 **.ipynb
 dlpm/private_code.py
