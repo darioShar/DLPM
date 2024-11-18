@@ -51,7 +51,7 @@ model:
   model_type: "ddpm"
   attn_resolutions: [2, 4]
   channel_mult: [1, 2, 2, 2]
-  dropout: 0.0
+  dropout: 0.0 #0.1
   model_channels: 32
   num_heads: 4
   num_res_blocks: 2
@@ -82,7 +82,7 @@ training:
 
 optim:
   optimizer: adamw
-  schedule: null #steplr
+  schedule: steplr #steplr
   lr: 0.0005
   warmup: 200 #100
   lr_steps: 300000
@@ -93,4 +93,4 @@ run:
   epochs: 900
   eval_freq: null
   checkpoint_freq: 300
-  progress: true # print progress bar of iter/epoch
+  progress: false # print progress bar of iter/epoch

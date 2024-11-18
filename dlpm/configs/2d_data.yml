@@ -3,14 +3,14 @@ seed: null
 data:
   between_minus_1_1: false
   quantile_cutoff: 1.0
-  data_alpha: 1.8
+  data_alpha: 1.7
   dataset: gmm_grid     # sas_grid
   isotropic: true
   n_mixture: 9          # must be square. set to None if not a grid mixture
   nfeatures: 2          # if data_type is 2d and this is one, will just project on first dimension
   dim: 2                # if data_type is 2d and this is one, will just project on first dimension
   normalized: false
-  nsamples: 25000
+  nsamples: 32000
   std: 0.1
   theta: 3.0
   weights:
@@ -39,7 +39,7 @@ lim:
 
 dlpm:
   alpha: 1.8 
-  reverse_steps: 250
+  reverse_steps: 100
   isotropic: true
   mean_predict: EPSILON # See dlpm.ModelMeanType
   rescale_timesteps: true
@@ -74,10 +74,10 @@ model:
   act: silu
   dropout_rate: 0.0
   group_norm: true
-  nblocks: 16
-  nunits: 128
+  nblocks: 4
+  nunits: 64
   skip_connection: true
-  time_emb_size: 16
+  time_emb_size: 32
   time_emb_type: learnable
   
   # experimented with inputting a_t_0, a_t_1 in the model: unsuccessful
@@ -89,7 +89,7 @@ model:
 
 
 training:
-  batch_size: 5000
+  batch_size: 1024
   num_workers: 0
 
   dlpm:
@@ -122,6 +122,6 @@ optim:
 
 run:
   epochs: 20
-  eval_freq: 10
+  eval_freq: null
   checkpoint_freq: null
-  progress: true # print progress bar
+  progress: false # print progress bar

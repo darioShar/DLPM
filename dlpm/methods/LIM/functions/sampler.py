@@ -22,8 +22,8 @@ def LIM_sampler(#args,
                 levy,
                 isotropic,
                 steps,
-                clamp_a,
-                clamp_eps,
+                gen_a,
+                gen_eps,
                 sde_clamp=None,
                 masked_data=None, 
                 mask=None, 
@@ -41,11 +41,11 @@ def LIM_sampler(#args,
     method = 'ode' if ddim else 'sde' # args.sample_type
     
     # They are always using sde_clamp = 20
-    if sde_clamp is None:
-        if clamp_a is None:
-            sde_clamp = 20
-        else:
-            sde_clamp = clamp_a #config.sampling.sde_clamp
+    # if sde_clamp is None:
+    #     if clamp_a is None:
+    #         sde_clamp = 20
+    #     else:
+    #         sde_clamp = clamp_a #config.sampling.sde_clamp
     
     # clamp_eps is what they call clamp_thresgold
 
@@ -62,14 +62,15 @@ def LIM_sampler(#args,
         sigma = sde.marginal_std(t)
         x_coeff = sde.diffusion_coeff(t)
 
-        if sde.alpha == 2:
-            e_L = torch.randn(size=(data.shape)).to(device)
-        else:
-            if is_isotropic:
-                e_L = levy.sample(alpha=sde.alpha, size=data.shape, is_isotropic=True, clamp=sde_clamp,clamp_threshold = clamp_eps).to(device)
-            else:
-                e_L = torch.clamp(levy.sample(alpha=sde.alpha, size=data.shape, is_isotropic=False, clamp=None).to(device), 
-                                      min=-sde_clamp, max=sde_clamp)
+        e_L = gen_eps.generate(size = data.shape)
+        # if sde.alpha == 2:
+        #     e_L = torch.randn(size=(data.shape)).to(device)
+        # else:
+        #     if is_isotropic:
+        #         e_L = levy.sample(alpha=sde.alpha, size=data.shape, is_isotropic=True, clamp=sde_clamp,clamp_threshold = clamp_eps).to(device)
+        #     else:
+        #         e_L = torch.clamp(levy.sample(alpha=sde.alpha, size=data.shape, is_isotropic=False, clamp=None).to(device), 
+                                    #   min=-sde_clamp, max=sde_clamp)
         
         match_last_dims(x_coeff, data.shape)
         data = match_last_dims(x_coeff, data.shape) * data + match_last_dims(sigma, data.shape) * e_L
@@ -142,11 +143,12 @@ def LIM_sampler(#args,
                 match_last_dims(score_coeff, x.shape) * score_s + \
                     match_last_dims(noise_coeff, x.shape) * e_B
         else:
-            if is_isotropic:
-               e_L = levy.sample(alpha=sde.alpha, size=x.shape, is_isotropic=True, clamp=sde_clamp).to(device)
-            else:
-                e_L = torch.clamp(levy.sample(alpha=sde.alpha, size=x.shape, is_isotropic=False, clamp=None).to(device), 
-                                  min=-sde_clamp, max=sde_clamp)
+            e_L = gen_eps.generate(size = x.shape)
+            # if is_isotropic:
+            #    e_L = levy.sample(alpha=sde.alpha, size=x.shape, is_isotropic=True, clamp=sde_clamp).to(device)
+            # else:
+            #     e_L = torch.clamp(levy.sample(alpha=sde.alpha, size=x.shape, is_isotropic=False, clamp=None).to(device), 
+            #                       min=-sde_clamp, max=sde_clamp)
             score_coeff = sde.alpha ** 2 * (-1 + a)
             x_t = match_last_dims(x_coeff, x.shape) * x + \
                 match_last_dims(score_coeff, x.shape) * score_s + \
@@ -195,11 +197,12 @@ def LIM_sampler(#args,
             score_coeff = beta_step
             x_t = match_last_dims(x_coeff, x.shape) * x + match_last_dims(score_coeff, x.shape) * score_s + noise_coeff[:, None, None,None] * e_B
         else:
-            if is_isotropic:
-                e_L = levy.sample(alpha=sde.alpha, size=x.shape, is_isotropic=True, clamp=sde_clamp,clamp_threshold = clamp_eps).to(device)
-            else:
-                e_L = torch.clamp(levy.sample(alpha=sde.alpha, size=x.shape, is_isotropic=False, clamp=None).to(device), 
-                                  min=-sde_clamp, max=sde_clamp)
+            e_L = gen_eps.generate(size = x.shape)
+            # if is_isotropic:
+            #     e_L = levy.sample(alpha=sde.alpha, size=x.shape, is_isotropic=True, clamp=sde_clamp,clamp_threshold = clamp_eps).to(device)
+            # else:
+            #     e_L = torch.clamp(levy.sample(alpha=sde.alpha, size=x.shape, is_isotropic=False, clamp=None).to(device), 
+            #                       min=-sde_clamp, max=sde_clamp)
                 
             score_coeff = sde.alpha * beta_step
             score_coeff =(sde.marginal_log_mean_coeff(t)-sde.marginal_log_mean_coeff(s))*sde.alpha**2
@@ -221,30 +224,31 @@ def LIM_sampler(#args,
         if method == "sde_imputation":
             x = impainted_noise(masked_data, x, mask, t0, device)
             
-        for i in tqdm.tqdm(range(steps)):
+        # for i in tqdm.tqdm(range(steps)):
+        for i in range(steps):
             vec_s, vec_t = torch.ones((x.shape[0],)).to(device) * timesteps[i], torch.ones((x.shape[0],)).to(device) * timesteps[i + 1]
             
             if method == 'sde':
                 x = sde_score_update(x, vec_s, vec_t)
                 # clamp threshold : re-normalization
-                if clamp_eps :
-                    size = x.shape
-                    l = len(x)
-                    x = x.reshape((l, -1))
-                    indices = x.norm(dim=1) > clamp_eps
-                    x[indices] = x[indices] / x[indices].norm(dim=1)[:, None] * clamp_eps
-                    x = x.reshape(size)
+                # if clamp_eps :
+                #     size = x.shape
+                #     l = len(x)
+                #     x = x.reshape((l, -1))
+                #     indices = x.norm(dim=1) > clamp_eps
+                #     x[indices] = x[indices] / x[indices].norm(dim=1)[:, None] * clamp_eps
+                #     x = x.reshape(size)
             
             elif method == 'sde_imputation':
                 x = sde_score_update_imputation(masked_data, mask, x, vec_s, vec_t)
                 x = sde_score_update(x, vec_s, vec_t)
 
-                size = x.shape
-                l = len(x)
-                x = x.reshape(( l, -1))
-                indices = x.norm(dim=1) > clamp_eps
-                x[indices] = x[indices] / x[indices].norm(dim=1)[:, None] * clamp_eps
-                x = x.reshape(size)
+                # size = x.shape
+                # l = len(x)
+                # x = x.reshape(( l, -1))
+                # indices = x.norm(dim=1) > clamp_eps
+                # x[indices] = x[indices] / x[indices].norm(dim=1)[:, None] * clamp_eps
+                # x = x.reshape(size)
     
             elif method == 'ode':
                 x = ode_score_update(x, vec_s, vec_t)

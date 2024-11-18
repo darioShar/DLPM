@@ -28,6 +28,9 @@ def update_parameters_before_loading(p, args):
 
     if args.non_iso_data:
         p['data']['isotropic'] = False
+
+    if args.data_std is not None:
+        p['data']['std'] = args.data_std
     
     if args.set_seed is not None:
         p['seed'] = args.set_seed
@@ -69,6 +72,12 @@ def update_parameters_before_loading(p, args):
     
     if args.lr_steps is not None:
         p['optim']['lr_steps'] = args.lr_steps
+    
+    if args.lr_schedule is not None:
+        if args.lr_schedule == 'None':
+            p['optim']['schedule'] = None
+        else:
+            p['optim']['schedule'] = args.lr_schedule
 
     if args.reverse_steps is not None:
         p['eval'][method]['reverse_steps'] = args.reverse_steps
@@ -179,10 +188,12 @@ def parse_args():
     # DATA
     parser.add_argument('--dataset', help='choose specific dataset', default = None, type = str)
     parser.add_argument('--nsamples', help='choose the size of the dataset (only 2d datasets)', default = None, type = str)
+    parser.add_argument('--data_std', help='choose data std or scale', default = None, type = float)
 
     # OPTIMIZER
     parser.add_argument('--lr', help='reinitialize learning rate', type=float, default = None)
     parser.add_argument('--lr_steps', help='reinitialize learning rate steps', type=int, default = None)
+    parser.add_argument('--lr_schedule', help='set learning rate schedule', type=str, default = None)
 
     # MODEL
     # only useful for 2d datasets

@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from .utils_exp import ExpUtils
+from .utils_exp import ExpUtils, print_dict
 
 
 '''
@@ -132,13 +132,6 @@ class Experiment:
     '''
     def print_parameters(self):
         print('Training with the following parameters:')
-        def print_dict(d, indent = 0):
-            for k, v in d.items():
-                if isinstance(v, dict):
-                    print('\t'*indent, k, '\t:')
-                    print_dict(v, indent + 1)
-                else:
-                    print('\t'*indent, k, ':', v)
         print_dict(self.utils.p)
 
     '''

@@ -3,6 +3,7 @@ import torch
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 from torchvision.datasets import CIFAR10, CelebA, MNIST, ImageNet, ImageFolder
+from .tinyimagenet import TinyImageNetDataset
 from torch.utils.data import TensorDataset
 from .lsun import LSUN
 import torch.utils.data
@@ -83,11 +84,13 @@ def dict2namespace(config):
 image_datasets = [
     "CIFAR10",
     "MINI_CIFAR10",
+    "CIFAR10_LT",
     "MNIST",
     "CELEBA",
     "CELEBA_HQ",
     "LSUN",
     "FFHQ",
+    'TINYIMAGENET'
 ]
 
 toy_datasets = [
@@ -172,7 +175,7 @@ def get_dataset(p):
         return dataset, test_dataset
     
     config.data.dataset = config.data.dataset.upper()
-    
+    print('loading dataset {}'.format(config.data.dataset))
     if config.data.dataset == "CIFAR10":
         if config.data.random_flip is False:
             tran_transform = test_transform = transforms.Compose(
@@ -199,6 +202,65 @@ def get_dataset(p):
             download=True,
             transform=tran_transform,#test_transform,
         )
+    elif config.data.dataset == "CIFAR10_LT":
+        if config.data.random_flip is False:
+            tran_transform = test_transform = transforms.Compose(
+                [transforms.Resize(config.data.image_size), transforms.ToTensor(), transforms.Lambda(affine_transform)]
+            )
+        else:
+            tran_transform = transforms.Compose(
+                [
+                    transforms.Resize(config.data.image_size),
+                    transforms.RandomHorizontalFlip(p=0.5),
+                    transforms.ToTensor(),
+                    transforms.Lambda(affine_transform),
+                ]
+            )
+        # code taken from https://discuss.pytorch.org/t/how-to-implement-oversampling-in-cifar-10/16964/5
+        # Load CIFAR10
+        dataset = CIFAR10(
+            root=os.path.join(DATA_PATH, "cifar10"),
+            train=True,
+            download=True,
+            transform=tran_transform,
+        )
+        test_dataset = CIFAR10(
+            root=os.path.join(DATA_PATH, "cifar10_test"),
+            train=False,
+            download=True,
+            transform=tran_transform,#test_transform,
+        )
+        print('warning: does not introduce imbalance in the test dataset yet')
+        # Get all training targets and count the number of class instances
+        targets = np.array(dataset.targets)
+        classes, class_counts = np.unique(targets, return_counts=True)
+        nb_classes = len(classes)
+        print('initial class count:', class_counts)
+
+        # Create artificial imbalanced class counts
+        # same as LIM 
+        imbal_class_counts = [5000,2997,1796,1077,645,387,232,139,83,50]
+        
+        #[500, 5000] * 5
+
+        # Get class indices
+        class_indices = [np.where(targets == i)[0] for i in range(nb_classes)]
+
+        # Get imbalanced number of instances
+        imbal_class_indices = [class_idx[:class_count] for class_idx, class_count in zip(class_indices, imbal_class_counts)]
+        imbal_class_indices = np.hstack(imbal_class_indices)
+
+        # Set target and data to dataset
+        dataset.targets = targets[imbal_class_indices]
+        dataset.data = dataset.data[imbal_class_indices]
+
+        # Get all training targets and count the number of class instances
+        targets = np.array(dataset.targets)
+        classes, class_counts = np.unique(targets, return_counts=True)
+        nb_classes = len(classes)
+        print('Final class count:', class_counts)
+
+        assert len(dataset.targets) == len(dataset.data)
     elif config.data.dataset == "MINI_CIFAR10":
         dataset = ImageFolder(
                 root=os.path.join(DATA_PATH, "mini_cifar10"),
@@ -400,6 +462,33 @@ def get_dataset(p):
         )
         test_dataset = Subset(dataset, test_indices)
         dataset = Subset(dataset, train_indices)
+    elif config.data.dataset == 'TINYIMAGENET':
+        if config.data.random_flip:
+            transform = transforms.Compose(
+                [transforms.RandomHorizontalFlip(p=0.5),
+                    transforms.ToTensor(),
+                    transforms.Resize(config.data.image_size),
+                    transforms.Lambda(affine_transform)]
+            )
+        else:
+            transform = transforms.Compose(
+                [transforms.ToTensor(),
+                transforms.Resize(config.data.image_size),
+                transforms.Lambda(affine_transform)]
+
+            )
+
+        dataset = TinyImageNetDataset(root_dir=os.path.join(DATA_PATH, 'tiny-imagenet-200'), 
+                                      mode='train', 
+                                      transform=transform,
+                                      download=False,
+                                      preload=False)
+        test_dataset = TinyImageNetDataset(root_dir=os.path.join(DATA_PATH, 'tiny-imagenet-200'), 
+                                      mode='test', 
+                                      transform=transform,
+                                      download=False,
+                                      preload=False)
+        #train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     else:
         dataset, test_dataset = None, None
 

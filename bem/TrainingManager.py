@@ -294,7 +294,7 @@ class TrainingManager:
         eval_save = torch.load(eval_path)
         assert 'eval' in eval_save, 'no eval subdict in eval file'
         # load eval metrics
-        self.eval.evals = eval_save['eval']
+        self.eval.evals.update(eval_save['eval'])
         self.eval.log_existing_eval_values(folder='eval')
 
         # load ema eval metrics
@@ -313,7 +313,7 @@ class TrainingManager:
             # find index of our mu of interest
             idx = saved_mus.index(ema_obj['default'].mu)
             # load the saved evaluation
-            ema_obj['eval'].evals = saved_ema_evals[idx]
+            ema_obj['eval'].evals.update(saved_ema_evals[idx])
             # log the saved evaluation
             ema_obj['eval'].log_existing_eval_values(folder='eval_ema_{}'.format(ema_obj['default'].mu))
     

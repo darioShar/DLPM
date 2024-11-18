@@ -36,6 +36,6 @@ def loss_fn(model,
     #d = x0.shape[-1] * x0.shape[-2] * x0.shape[-3]
     d = torch.prod(torch.tensor(x0.shape[1:]))
 
-    out = F.smooth_l1_loss(output, score, beta=1, size_average=True, reduction='mean') / d
+    out = F.smooth_l1_loss(output, score, beta=1, size_average=True, reduction='mean') # / d
 
     return out

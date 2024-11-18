@@ -13,6 +13,7 @@ log/*
 **.batch
 **.sh
 **.out
+exp_**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
