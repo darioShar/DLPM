@@ -456,22 +456,24 @@ class GenerativeLevyProcess:
                    shape,
                    ddim = False,
                    get_sample_history = False,
-                   clip_denoised = False
+                   clip_denoised = False,
                    ):
                     
         init_clamp = 20. #config.sampling.init_clamp # is 20 in LIM configs, can be set to None
         
-        if self.sde.alpha == 2.0:
-            # Gaussian noise
-            x = torch.randn(shape).to(self.device)
-        else:
-            if self.isotropic:
-                # isotropic
-                x = self.levy.sample(alpha=self.sde.alpha, size=shape, is_isotropic=True, clamp=init_clamp).to(self.device)
-            else:
-                # non-isotropic
-                x = torch.clamp(self.levy.sample(self.sde.alpha, size=shape, is_isotropic=False, clamp=None).to(self.device), 
-                                min=-init_clamp, max=init_clamp)
+        x = self.dlpm.gen_eps.generate(size = shape)
+
+        # if self.sde.alpha == 2.0:
+        #     # Gaussian noise
+        #     x = torch.randn(shape).to(self.device)
+        # else:
+        #     if self.isotropic:
+        #         # isotropic
+        #         x = self.levy.sample(alpha=self.sde.alpha, size=shape, is_isotropic=True, clamp=init_clamp).to(self.device)
+        #     else:
+        #         # non-isotropic
+        #         x = torch.clamp(self.levy.sample(self.sde.alpha, size=shape, is_isotropic=False, clamp=None).to(self.device), 
+        #                         min=-init_clamp, max=init_clamp)
             
         if False: #config.model.is_conditional:
             if config.sampling.cond_class is not None: 
@@ -488,14 +490,14 @@ class GenerativeLevyProcess:
                               #config=self.config,
                               ddim = ddim,
                               x = x,
-                              y = None,
+                              y = y,
                               model = model,
                               sde = self.sde,
                               levy = self.levy,
                               isotropic=self.isotropic,
                               steps=self.reverse_steps,
-                              clamp_a = self.clamp_a,
-                              clamp_eps = self.clamp_eps,
+                              gen_a = self.dlpm.gen_a,
+                              gen_eps = self.dlpm.gen_eps,
                               device = self.device,
                               get_sample_history = get_sample_history)
         # The clamping and inverse affine transform will be managed in the generation manager.
@@ -611,7 +613,7 @@ class GenerativeLevyProcess:
                             model,
                             x_start,
                             loss_type = 'EPSILON',
-                            lploss =1.0,
+                            lploss = 2.0,
                             loss_monte_carlo  = 'mean',
                             monte_carlo_outer = 1,
                             monte_carlo_inner = 1,
@@ -648,6 +650,7 @@ class GenerativeLevyProcess:
         A = self.dlpm.get_one_rv_faster_sampling(list(outer_shape))
         A_extended = A.repeat(monte_carlo_inner, *([1]*len(A.shape[1:])))
         z_t_extended = torch.randn_like(x_start_extended, device=self.device) # inner expectation Gaussian (z_t)
+        # print('shapes', x_start_extended.shape, t_extended.shape, A_extended.shape, z_t_extended.shape)
         # get loss elements
         x_t, eps_t = self.dlpm.get_one_rv_loss_elements(t_extended, x_start_extended, A_extended, z_t_extended)
 
@@ -655,9 +658,9 @@ class GenerativeLevyProcess:
         input_scaling = 1.0
         if self.input_scaling and (self.dlpm.scale == 'scale_exploding'):
             input_scaling = match_last_dims(1 / (1+self.dlpm.barsigmas[t_extended]), x_t.shape)
-        model_eps = model(x_t * input_scaling,  self._scale_timesteps(t), **model_kwargs)
+        model_eps = model(x_t * input_scaling,  self._scale_timesteps(t_extended), **model_kwargs)
         
-        assert model_eps.shape == x_start.shape
+        # assert model_eps.shape == x_start_extended.shape
 
         # compute loss with the right exponent
         losses = compute_loss_terms(model_eps, eps_t, lploss)
@@ -677,19 +680,25 @@ class GenerativeLevyProcess:
     def training_losses_lim(self, 
                             model, 
                             x_start, 
-                            y = None):
+                            y = None,
+                            clamp_a = None,
+                            clamp_eps = None,
+                            ):
         n = x_start.size(0)
+        self.dlpm.gen_a.setParams(clamp_a = clamp_a)
+        self.dlpm.gen_eps.setParams(clamp_eps = clamp_eps)
         # Noise
         if self.sde.alpha == 2.0:
             # gaussian noise
             e = torch.randn_like(x_start).to(self.device)
         else:
             clamp = 20 # set to 20 in their configs. Can be set to None
-            if self.isotropic:
-                e = self.levy.sample(alpha=self.sde.alpha, size=x_start.shape, is_isotropic=True, clamp=clamp).to(self.device)
-            else:
-                e = torch.clamp(self.levy.sample(self.sde.alpha, size=x_start.shape, is_isotropic=False, clamp=None).to(self.device), 
-                                min=-clamp, max=clamp)
+            e = self.dlpm.gen_eps.generate(size = x_start.shape)
+            # if self.isotropic:
+            #     e = self.levy.sample(alpha=self.sde.alpha, size=x_start.shape, is_isotropic=True, clamp=clamp).to(self.device)
+            # else:
+            #     e = torch.clamp(self.levy.sample(self.sde.alpha, size=x_start.shape, is_isotropic=False, clamp=None).to(self.device), 
+            #                     min=-clamp, max=clamp)
 
         # time
         start_eps = 1e-5  

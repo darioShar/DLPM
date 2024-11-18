@@ -31,9 +31,9 @@ lim:
 # replace 'ddim' by 'determinsitic' and udpate dlpm/dlim and lim/ode accordingly
 # manage 'eta'
 eval:
-  data_to_generate: 4096
-  batch_size: 128
-  real_data: 1000 # in case of images, number of real images to store and to compare to
+  data_to_generate: 5000
+  batch_size: 64
+  real_data: 5000 # in case of images, number of real images to store and to compare to
 
   dlpm:
     deterministic: false # dlim
@@ -50,7 +50,7 @@ eval:
 
 model:
   model_type: "ddpm" #ddpm, lim_ddpm, lim_ncsnpp
-  attn_resolutions: [16,]
+  attn_resolutions: [4, 8, 16]
   channel_mult: [1, 2, 2, 2]
   dropout: 0.0
   model_channels: 128
@@ -60,13 +60,13 @@ model:
 
 
 training:
-  batch_size: 128
-  num_workers: 2
+  batch_size: 64
+  num_workers: 0
 
   dlpm:
     ema_rates:
     - 0.9999
-    grad_clip: null #1.0
+    grad_clip: 5.0 #1.0
 
     loss_monte_carlo: mean # mean or median. aggregate function to apply to batch loss with M samples of a_{1:T}
     loss_type: EPS_LOSS # other loss types to reimplment
@@ -80,7 +80,7 @@ training:
   lim:
     ema_rates:
     - 0.9999
-    grad_clip: null #1.0
+    grad_clip: 5.0 #1.0
 
   
 optim:
@@ -93,7 +93,7 @@ optim:
   lr_gamma: 0.99
 
 run:
-  epochs: 500 #10000
+  epochs: 400 #10000
   eval_freq: null
   checkpoint_freq: 100
   progress: true # print progress bar

@@ -132,7 +132,7 @@ class EvaluationManager:
             #self.gen_model.generate(data_to_generate, 
             #                print_progression= True,
             #                **kwargs)
-            self.gen_manager.generate(models, data_to_generate, print_progression=False, **kwargs)
+            self.gen_manager.generate(models, data_to_generate, **kwargs)
             
             # prepare data.
             gen_samples = self.gen_manager.samples
@@ -182,7 +182,6 @@ class EvaluationManager:
                     print(remaining, end = ' ')
                     self.gen_manager.generate(models,
                                          min(batch_size, remaining),
-                                         print_progression= True,
                                          **kwargs)
                     # save data to file. We do that rather than concatenating to save on memory, 
                     # but really it is because I want to inspect the images while they are generated
@@ -202,7 +201,7 @@ class EvaluationManager:
                                             self.gen_data_path, 
                                             128, # batch size
                                             self.method.device, 
-                                            num_workers= 4 if self.is_image else 0)
+                                            num_workers= 2 if self.is_image else 0)
             print(eval_results['fid'])
             print('prdc')
             # precision, recall density, coverage
@@ -210,7 +209,7 @@ class EvaluationManager:
                             self.gen_data_path, 
                             128, # batch size 
                             self.method.device, 
-                            num_workers= 4 if self.is_image else 0,
+                            num_workers= 2 if self.is_image else 0,
                             max_num_files=data_to_generate if data_to_generate != 0 else None) # None means read whole image directory, which should be full from a previous run
         
         for k, v in prdc_value.items():

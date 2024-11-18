@@ -18,6 +18,14 @@ from .datasets import inverse_affine_transform
 
 ''''''''''' FILE MANIPULATION '''''''''''
 
+def print_dict(d, indent = 0):
+    for k, v in d.items():
+        if isinstance(v, dict):
+            print('\t'*indent, k, '\t:')
+            print_dict(v, indent + 1)
+        else:
+            print('\t'*indent, k, ':', v)
+
 class FileHandler:
     '''
     p: parameters dictionnary
@@ -198,9 +206,9 @@ class FileHandler:
         def save_images(path):
                 print('storing dataset in', path)
                 # now saving the original data
-                assert dataset_name.lower() in ['mnist', 'cifar10', 'celeba'], 'only mnist, cifar10, celeba datasets are supported for the moment. \
-                    For the moment we are loading {} data points. We may need more for the other datasets, \
-                        and anyway we should implement somehting more systematic'.format(num_real_data)
+                # assert dataset_name.lower() in ['mnist', 'cifar10', 'celeba', 'cifar10_lt', 'tinyimagenet'], 'only mnist, cifar10, celeba datasets are supported for the moment. \
+                #     For the moment we are loading {} data points. We may need more for the other datasets, \
+                #         and anyway we should implement somehting more systematic'.format(num_real_data)
                 #data = gen_model.load_original_data(evaluation_files) # load all the data. Number of datapoints specific to mnist and cifar10
                 data_to_store = num_real_data
                 print('saving {} original images from pool of {} datapoints'.format(data_to_store, len(dataset_files)))
@@ -253,7 +261,7 @@ class FileHandler:
     @staticmethod
     # loads all params from a specific folder
     def get_params_from_folder(folder_path):
-        return [torch.load(path) for path in Path(folder_path).glob("parameters*")]
+        return [(path, torch.load(path)) for path in Path(folder_path).glob("parameters*")]
 
 
 

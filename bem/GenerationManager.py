@@ -30,7 +30,7 @@ class GenerationManager:
                  models,
                  nsamples,
                  get_sample_history = False, # if method supports it, get the history of the samples
-                 print_progression=True,
+                 print_progression=False,
                  **kwargs
                  ):
         assert nsamples > 0, 'nsamples must be greater than 0, got {}'.format(nsamples)

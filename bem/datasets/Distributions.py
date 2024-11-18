@@ -218,6 +218,10 @@ def sample_grid_sas(n_samples,
             e = int(idx[i*n + j + 1])
             data[s:e] = data[s:e] + torch.tensor([i, j])
 
+    # center the data such that the center of the grid is at 0
+    data = data - torch.tensor([n/2, n/2])
+    
+
     if normalize:
         data = (data - data.mean()) / data.std()
     # don't forget to shuffle rows, otherwise sorted by mixture
