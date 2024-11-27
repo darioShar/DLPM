@@ -51,17 +51,17 @@ dlpm:
 # replace 'ddim' by 'determinsitic' and udpate dlpm/dlim and lim/ode accordingly
 # manage 'eta'
 eval:
-  data_to_generate: 10000
-  batch_size: 4096
-  real_data: 10000 # in case of images, number of real images to store and to compare to
+  data_to_generate: 15000
+  batch_size: 1024
+  real_data: 15000 # in case of images, number of real images to store and to compare to
 
   dlpm:
     deterministic: false # dlim
     dlim_eta: 0.0
     reverse_steps: 100
     clip_denoised: false
-    clamp_a: 10
-    clamp_eps: 50
+    clamp_a: null
+    clamp_eps: null
   
   lim: 
     deterministic: false # ODE
@@ -103,13 +103,16 @@ training:
     monte_carlo_inner: 1 # number of samples for inner expetation approximation in the loss of Proposition (9)
     monte_carlo_outer: 1 # number of samples for outer expectation approximation in the loss of Proposition (9)
 
-    clamp_a: 10
-    clamp_eps: 50
+    clamp_a: null
+    clamp_eps: null
 
   lim:
     ema_rates:
     #- 0.9
     grad_clip: null #1.0
+
+    clamp_a: null
+    clamp_eps: null
 
 optim:
   optimizer: adamw
