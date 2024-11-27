@@ -40,8 +40,8 @@ eval:
     dlim_eta: 0.0
     reverse_steps: 1000
     clip_denoised: false
-    clamp_a: 10
-    clamp_eps: 50
+    clamp_a: 20
+    clamp_eps: 200
   
   lim: 
     deterministic: false # ODE
@@ -74,8 +74,8 @@ training:
     monte_carlo_inner: 1 # number of samples for inner expetation approximation in the loss of Proposition (9)
     monte_carlo_outer: 1 # number of samples for outer expectation approximation in the loss of Proposition (9)
 
-    clamp_a: 10
-    clamp_eps: 50
+    clamp_a: 20
+    clamp_eps: 200
 
   lim:
     ema_rates:
