@@ -14,7 +14,6 @@ log/*
 **.sh
 **.out
 exp_**
-**.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

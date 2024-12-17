@@ -8,7 +8,6 @@ from .utils_ema import EMAHelper
 #Wrapper around training and evaluation functions
 
 
-
 class TrainingManager:
     
     def __init__(self, 
@@ -43,6 +42,13 @@ class TrainingManager:
                 ema_dict = {name: EMAHelper(model, mu = mu) for name, model in self.models.items()}
                 ema_dict['eval'] = copy.deepcopy(eval)
                 self.ema_objects.append(ema_dict)
+            # self.ema_objects = [{
+            #     'model': ema.EMAHelper(self.model, mu = mu),
+            #     'model_vae': ema.EMAHelper(self.model_vae, mu = mu) if self.model_vae is not None else None,
+            #     'eval': copy.deepcopy(eval),
+            # } for mu in ema_rates]
+            
+            #self.ema_evals = [(copy.deepcopy(eval), mu) for mu in ema_rates]
             eval.logger = logger 
             for ema_object in self.ema_objects:
                 ema_object['eval'].logger = logger
@@ -351,12 +357,3 @@ class TrainingManager:
     #        self.logger.stop()
     #    if new_parameters is not None:
     #        self.logger.initialize(new_parameters)
-
-
-                # self.ema_objects = [{
-            #     'model': ema.EMAHelper(self.model, mu = mu),
-            #     'model_vae': ema.EMAHelper(self.model_vae, mu = mu) if self.model_vae is not None else None,
-            #     'eval': copy.deepcopy(eval),
-            # } for mu in ema_rates]
-            
-            #self.ema_evals = [(copy.deepcopy(eval), mu) for mu in ema_rates]
