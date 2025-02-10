@@ -6,11 +6,9 @@ Denoising Levy Probabilistic Models are generative diffusion models replacing Ga
 
 This repository contains the full implementation of DLPM, which consists in small modifications on top of an existing Gaussian-based diffusion model (DDPM) implementation.
 
-It provides the tools for training, evaluation, and generation of data using these models. It includes a modular structure, allowing users to customize different components like the neural network, the logging mechanisms, and the experiment setup.
-
 ## Repository Overview
 
-We are using [BEM (Better Experimentation Manager)](https://github.com/darioShar/bem) to manage our experiments.
+This repo provides the tools for training, evaluation, and generation of data using these models. We are using [BEM (Better Experimentation Manager for deep learning with Pytorch)](https://github.com/darioShar/bem) to manage our experiments.
 
 - **Generative Model Implementation**: Located in `dlpm/methods/dlpm.py` and `dlpm/methods/GenerativeLevyProcess.py`, these files contain the core logic of the DLPM generative model. Users interested in understanding or modifying the underlying generative processes should start here.
   
