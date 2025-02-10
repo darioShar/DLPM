@@ -2,7 +2,7 @@
 
 [Arxiv paper](https://arxiv.org/abs/2407.18609)
 
-Denoising Levy Probabilistic Models are heavy-tailed generative diffusion models, replacing the Gaussian distribution by the [Levy $\alpha$-stable distribution](https://en.wikipedia.org/wiki/Stable_distribution). This heavy-tailed modification improves the generation of heavy-tailed datasets, or (bounded) datasets exhibiting strong class imbalance (e.g., images with rare classes).
+Denoising Levy Probabilistic Models are heavy-tailed generative diffusion models, replacing the Gaussian distribution by the [Lévy stable distribution](https://en.wikipedia.org/wiki/Stable_distribution). This heavy-tailed modification improves the generation of heavy-tailed datasets, or (bounded) datasets exhibiting strong class imbalance (e.g., images with rare classes).
 
 This repository contains the full implementation of DLPM, which consists in small modifications on top of an existing Gaussian-based diffusion model (DDPM) implementation.
 
