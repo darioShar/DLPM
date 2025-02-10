@@ -88,7 +88,7 @@ python ./display.py --config mnist --name dlpm_test --method dlpm --epochs 100 -
 
 ## Citation
 
-```bash
+```bibtex
 @misc{shariatian2024denoisinglevyprobabilisticmodels,
       title={Denoising L\'evy Probabilistic Models}, 
       author={Dario Shariatian and Umut Simsekli and Alain Durmus},
