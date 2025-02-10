@@ -73,18 +73,7 @@ python ./eval.py --config mnist --name dlpm_test --method dlpm --epochs 100 --ev
 - `--generate`: Number of samples to generate.
 - `--reverse_steps`: Number of reverse steps to use during the generation process.
 
-### 3. `display.py`
 
-This script is used to visualize the generated samples or the results from an experiment.
-
-**Example Command**:
-```bash
-python ./display.py --config mnist --name dlpm_test --method dlpm --epochs 100 --reverse_steps 1000 --generate 1
-```
-
-**Explanation**:
-- `--config`, `--name`, `--method`, `--epochs`, and `--reverse_steps`: Same as in the previous scripts.
-- `--generate`: Specifies the number of samples to visualize (e.g., `1` for displaying a single sample).
 
 ## Citation
 
